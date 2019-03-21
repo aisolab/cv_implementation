@@ -61,9 +61,9 @@ class Vgg16(nn.Module):
         self.apply(self._init_weight)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        fmap = self.__extractor(x)
+        fmap = self._extractor(x)
         flattend = fmap.view(-1, 512)
-        score = self.__classifier(flattend)
+        score = self._classifier(flattend)
         return score
 
     def _init_weight(self, layer):
