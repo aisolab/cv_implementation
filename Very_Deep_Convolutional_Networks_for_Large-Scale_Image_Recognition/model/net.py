@@ -13,7 +13,7 @@ class ConvBlock(nn.Module):
             use_1x1conv (bool): Using 1x1 convolution
         """
         super(ConvBlock, self).__init__()
-        self.ops = nn.Sequential(nn.Conv2d(in_channels, out_channels, 3, 1, 1),
+        self._ops = nn.Sequential(nn.Conv2d(in_channels, out_channels, 3, 1, 1),
                                  nn.ReLU(),
                                  nn.BatchNorm2d(out_channels),
                                  nn.Conv2d(out_channels, out_channels, 3, 1, 1),
@@ -21,12 +21,12 @@ class ConvBlock(nn.Module):
                                  nn.BatchNorm2d(out_channels))
 
         if use_1x1conv == True:
-            self.ops.add_module(nn.Conv2d.__name__, nn.Conv2d(out_channels, out_channels, 1, 1, 0))
-            self.ops.add_module(nn.ReLU.__name__, nn.ReLU())
-            self.ops.add_module(nn.BatchNorm2d.__name__, nn.BatchNorm2d(out_channels))
+            self._ops.add_module(nn.Conv2d.__name__, nn.Conv2d(out_channels, out_channels, 1, 1, 0))
+            self._ops.add_module(nn.ReLU.__name__, nn.ReLU())
+            self._ops.add_module(nn.BatchNorm2d.__name__, nn.BatchNorm2d(out_channels))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        fmap = self.ops(x)
+        fmap = self._ops(x)
         return fmap
 
 
@@ -39,7 +39,7 @@ class Vgg16(nn.Module):
             num_classes (int): the number of classes
         """
         super(Vgg16, self).__init__()
-        self.__extractor = nn.Sequential(ConvBlock(3, 64, False),
+        self._extractor = nn.Sequential(ConvBlock(3, 64, False),
                                          nn.MaxPool2d(2, 2),
                                          ConvBlock(64, 128, False),
                                          nn.MaxPool2d(2, 2),
@@ -50,7 +50,7 @@ class Vgg16(nn.Module):
                                          ConvBlock(512, 512, True),
                                          nn.MaxPool2d(2, 2))
 
-        self.__classifier = nn.Sequential(nn.Linear(512, 512),
+        self._classifier = nn.Sequential(nn.Linear(512, 512),
                                           nn.ReLU(),
                                           nn.BatchNorm1d(512, affine=True),
                                           nn.Linear(512, 512),
@@ -58,7 +58,7 @@ class Vgg16(nn.Module):
                                           nn.BatchNorm1d(512, affine=True),
                                           nn.Linear(512, num_classes))
 
-        self.apply(self.__init_weight)
+        self.apply(self._init_weight)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         fmap = self.__extractor(x)
@@ -66,7 +66,7 @@ class Vgg16(nn.Module):
         score = self.__classifier(flattend)
         return score
 
-    def __init_weight(self, layer):
+    def _init_weight(self, layer):
         nn.init.kaiming_uniform_(layer.weight) if isinstance(layer, nn.Conv2d) or isinstance(layer, nn.Linear) \
             else None
 
