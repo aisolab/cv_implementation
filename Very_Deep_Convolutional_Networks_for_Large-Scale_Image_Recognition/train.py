@@ -11,7 +11,6 @@ from torch.utils.data import DataLoader
 from model.net import Vgg16
 from tqdm import tqdm
 
-
 def train(cfgpath):
     # parsing json
     with open(os.path.join(os.getcwd(), 'experiments/config.json')) as io:
