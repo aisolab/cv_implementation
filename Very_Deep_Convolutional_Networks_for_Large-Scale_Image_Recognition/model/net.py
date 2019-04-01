@@ -14,11 +14,11 @@ class ConvBlock(nn.Module):
         """
         super(ConvBlock, self).__init__()
         self._ops = nn.Sequential(nn.Conv2d(in_channels, out_channels, 3, 1, 1),
-                                 nn.ReLU(),
-                                 nn.BatchNorm2d(out_channels),
-                                 nn.Conv2d(out_channels, out_channels, 3, 1, 1),
-                                 nn.ReLU(),
-                                 nn.BatchNorm2d(out_channels))
+                                  nn.ReLU(),
+                                  nn.BatchNorm2d(out_channels),
+                                  nn.Conv2d(out_channels, out_channels, 3, 1, 1),
+                                  nn.ReLU(),
+                                  nn.BatchNorm2d(out_channels))
 
         if use_1x1conv == True:
             self._ops.add_module(nn.Conv2d.__name__, nn.Conv2d(out_channels, out_channels, 1, 1, 0))
@@ -40,22 +40,22 @@ class Vgg16(nn.Module):
         """
         super(Vgg16, self).__init__()
         self._extractor = nn.Sequential(ConvBlock(3, 64, False),
-                                         nn.MaxPool2d(2, 2),
-                                         ConvBlock(64, 128, False),
-                                         nn.MaxPool2d(2, 2),
-                                         ConvBlock(128, 256, True),
-                                         nn.MaxPool2d(2, 2),
-                                         ConvBlock(256, 512, True),
-                                         nn.MaxPool2d(2, 2),
-                                         ConvBlock(512, 512, True),
-                                         nn.MaxPool2d(2, 2))
+                                        nn.MaxPool2d(2, 2),
+                                        ConvBlock(64, 128, False),
+                                        nn.MaxPool2d(2, 2),
+                                        ConvBlock(128, 256, True),
+                                        nn.MaxPool2d(2, 2),
+                                        ConvBlock(256, 512, True),
+                                        nn.MaxPool2d(2, 2),
+                                        ConvBlock(512, 512, True),
+                                        nn.MaxPool2d(2, 2))
 
         self._classifier = nn.Sequential(nn.Linear(512, 512),
                                          nn.ReLU(),
-                                         nn.BatchNorm1d(512, affine=True),
+                                         nn.BatchNorm1d(512),
                                          nn.Linear(512, 512),
                                          nn.ReLU(),
-                                         nn.BatchNorm1d(512, affine=True),
+                                         nn.BatchNorm1d(512),
                                          nn.Linear(512, num_classes))
 
         self.apply(self._init_weight)

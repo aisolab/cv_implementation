@@ -9,6 +9,7 @@ from torchvision import transforms
 from torchvision.transforms import RandomHorizontalFlip, RandomVerticalFlip, ToTensor
 from torch.utils.data import DataLoader
 from model.net import Vgg16
+from tensorboardX import SummaryWriter
 from tqdm import tqdm
 
 def evaluate(model, dataloader, loss_fn, device):
@@ -50,6 +51,7 @@ def main(cfgpath):
     # training
     loss_fn = nn.CrossEntropyLoss()
     opt = optim.Adam(params=model.parameters(), lr=learning_rate)
+    writer = SummaryWriter('./runs/exp')
 
     for epoch in tqdm(range(epochs), desc='epochs'):
 
@@ -65,6 +67,12 @@ def main(cfgpath):
             opt.step()
 
             tr_loss += mb_loss.item()
+            if (epoch * batch_size + step) % 300 == 0:
+                val_loss = evaluate(model, val_dl, loss_fn, device)
+                writer.add_scalars('loss', {'train': tr_loss / (step + 1),
+                                            'validation': val_loss}, epoch * batch_size + step)
+                model.train()
+
         else:
             tr_loss /= (step + 1)
 
