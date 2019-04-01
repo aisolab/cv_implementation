@@ -51,12 +51,12 @@ class Vgg16(nn.Module):
                                          nn.MaxPool2d(2, 2))
 
         self._classifier = nn.Sequential(nn.Linear(512, 512),
-                                          nn.ReLU(),
-                                          nn.BatchNorm1d(512, affine=True),
-                                          nn.Linear(512, 512),
-                                          nn.ReLU(),
-                                          nn.BatchNorm1d(512, affine=True),
-                                          nn.Linear(512, num_classes))
+                                         nn.ReLU(),
+                                         nn.BatchNorm1d(512, affine=True),
+                                         nn.Linear(512, 512),
+                                         nn.ReLU(),
+                                         nn.BatchNorm1d(512, affine=True),
+                                         nn.Linear(512, num_classes))
 
         self.apply(self._init_weight)
 
