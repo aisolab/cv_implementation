@@ -8,10 +8,10 @@ from torch.utils.data import DataLoader
 from model.net import Vgg16
 from tqdm import tqdm
 
-def evaluate(model, dataloader, device):
+def get_accuracy(model, dataloader, device):
     correct_count = 0
     total_count = 0
-    for mb in tqdm(dataloader, desc='iters'):
+    for mb in tqdm(dataloader, desc='steps'):
         x_mb, y_mb = map(lambda elm: elm.to(device), mb)
 
         with torch.no_grad():
@@ -48,8 +48,8 @@ def main(cfgpath):
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     model.to(device)
 
-    tr_acc = evaluate(model, tr_dl, device)
-    val_acc = evaluate(model, val_dl, device)
+    tr_acc = get_accuracy(model, tr_dl, device)
+    val_acc = get_accuracy(model, val_dl, device)
     print('tr_acc: {:.2%}, val_acc: {:.2%}'.format(tr_acc, val_acc))
 
 if __name__ == '__main__':
