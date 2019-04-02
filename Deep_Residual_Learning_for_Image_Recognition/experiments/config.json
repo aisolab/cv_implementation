@@ -1,0 +1,7 @@
+{
+  "model": {"num_classes": 10},
+  "training": {"epochs": 20,
+               "batch_size": 64,
+               "learning_rate": 1e-3},
+  "filepath": {"ckpt": "checkpoint/model_ckpt.tar"}
+}
