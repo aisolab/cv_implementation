@@ -6,7 +6,7 @@ from torchvision.datasets import CIFAR10
 from torchvision import transforms
 from torchvision.transforms import ToTensor, Normalize
 from torch.utils.data import DataLoader
-from model.net import ResNet
+from model.net import ResNet50
 from tqdm import tqdm
 
 def get_accuracy(model, dataloader, device):
@@ -35,7 +35,7 @@ def main(cfgpath):
 
     # creating model
 
-    model = ResNet(num_classes=num_classes)
+    model = ResNet50(num_classes=num_classes)
     model.load_state_dict(ckpt['model_state_dict'])
     model.eval()
 

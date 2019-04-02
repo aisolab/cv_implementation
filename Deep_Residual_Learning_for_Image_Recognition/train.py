@@ -8,7 +8,7 @@ from torchvision.datasets import CIFAR10
 from torchvision import transforms
 from torchvision.transforms import RandomCrop, RandomHorizontalFlip, ToTensor, Normalize
 from torch.utils.data import DataLoader
-from model.net import ResNet
+from model.net import ResNet50
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
 
@@ -38,7 +38,7 @@ def main(cfgpath):
 
     # creating model
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-    model = ResNet(num_classes=num_classes)
+    model = ResNet50(num_classes=num_classes)
     model.to(device)
 
     # creating dataset, dataloader
