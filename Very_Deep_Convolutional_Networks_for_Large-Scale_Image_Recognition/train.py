@@ -4,9 +4,10 @@ import fire
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torchvision.datasets import CIFAR10
 from torchvision import transforms
-from torchvision.transforms import RandomHorizontalFlip, RandomVerticalFlip, ToTensor
+from torchvision.transforms import RandomCrop, RandomHorizontalFlip, ToTensor, Normalize
 from torch.utils.data import DataLoader
 from model.net import Vgg16
 from tensorboardX import SummaryWriter
@@ -42,15 +43,22 @@ def main(cfgpath):
     model.to(device)
 
     # creating dataset, dataloader
-    augment = transforms.Compose([RandomHorizontalFlip(), RandomVerticalFlip(), ToTensor()])
-    tr_ds = CIFAR10(root='./data', train=True, transform=augment, download=True)
+    transform_tr = transforms.Compose([RandomCrop(32, 4),
+                                       RandomHorizontalFlip(),
+                                       ToTensor(),
+                                       Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))])
+    transform_val = transforms.Compose([ToTensor(),
+                                        Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))])
+
+    tr_ds = CIFAR10(root='./data', train=True, transform=transform_tr, download=True)
     tr_dl = DataLoader(tr_ds, batch_size=batch_size, shuffle=True, num_workers=4, drop_last=True)
-    val_ds = CIFAR10(root='./data', train=False, transform=ToTensor(), download=False)
+    val_ds = CIFAR10(root='./data', train=False, transform=transform_val, download=False)
     val_dl = DataLoader(val_ds, batch_size=batch_size, num_workers=4)
 
     # training
     loss_fn = nn.CrossEntropyLoss()
-    opt = optim.Adam(params=model.parameters(), lr=learning_rate)
+    opt = optim.Adam(params=model.parameters(), lr=learning_rate, weight_decay=5e-4)
+    scheduler = ReduceLROnPlateau(opt, patience=5)
     writer = SummaryWriter('./runs/exp')
 
     for epoch in tqdm(range(epochs), desc='epochs'):
@@ -77,7 +85,7 @@ def main(cfgpath):
             tr_loss /= (step + 1)
 
         val_loss = evaluate(model, val_dl, loss_fn, device)
-
+        scheduler.step(val_loss)
         tqdm.write('epochs : {:3}, tr_loss: {:.3f}, val_loss: {:.3f}'.format(epoch + 1, tr_loss, val_loss))
 
     ckpt = {'epoch': epoch,

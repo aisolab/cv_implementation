@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-# https://arxiv.org/abs/1409.1556
 
 class ConvBlock(nn.Module):
     "ConvBlock for Vgg16"

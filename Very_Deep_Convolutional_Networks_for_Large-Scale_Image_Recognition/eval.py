@@ -3,7 +3,8 @@ import json
 import fire
 import torch
 from torchvision.datasets import CIFAR10
-from torchvision.transforms import ToTensor
+from torchvision import transforms
+from torchvision.transforms import ToTensor, Normalize
 from torch.utils.data import DataLoader
 from model.net import Vgg16
 from tqdm import tqdm
@@ -38,10 +39,13 @@ def main(cfgpath):
     model.load_state_dict(ckpt['model_state_dict'])
     model.eval()
 
+    transform = transforms.Compose([ToTensor(),
+                                    Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))])
+
     # creating dataset, dataloader
-    tr_ds = CIFAR10(root='./data', train=True, transform=ToTensor(), download=False)
+    tr_ds = CIFAR10(root='./data', train=True, transform=transform, download=False)
     tr_dl = DataLoader(tr_ds, batch_size=batch_size, num_workers=4)
-    val_ds = CIFAR10(root='./data', train=False, transform=ToTensor(), download=False)
+    val_ds = CIFAR10(root='./data', train=False, transform=transform, download=False)
     val_dl = DataLoader(val_ds, batch_size=batch_size, num_workers=4)
 
     # evaluate
