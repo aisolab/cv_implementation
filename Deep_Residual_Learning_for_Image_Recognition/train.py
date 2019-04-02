@@ -50,7 +50,8 @@ def main(cfgpath):
 
     # training
     loss_fn = nn.CrossEntropyLoss()
-    opt = optim.Adam(params=model.parameters(), lr=learning_rate)
+    opt = optim.SGD(params=model.parameters(), lr=learning_rate, momentum=.9, weight_decay=1e-4)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(opt)
     writer = SummaryWriter('./runs/exp')
 
     for epoch in tqdm(range(epochs), desc='epochs'):
@@ -75,9 +76,8 @@ def main(cfgpath):
 
         else:
             tr_loss /= (step + 1)
-
         val_loss = evaluate(model, val_dl, loss_fn, device)
-
+        scheduler.step(val_loss)
         tqdm.write('epochs : {:3}, tr_loss: {:.3f}, val_loss: {:.3f}'.format(epoch + 1, tr_loss, val_loss))
 
     ckpt = {'epoch': epoch,
