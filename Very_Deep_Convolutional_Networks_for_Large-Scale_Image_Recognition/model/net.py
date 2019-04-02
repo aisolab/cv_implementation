@@ -1,6 +1,11 @@
 import torch
 import torch.nn as nn
 
+class Flatten(nn.Module):
+    """Flatten class"""
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return x.view(x.size(0), -1)
+
 class ConvBlock(nn.Module):
     "ConvBlock for Vgg16"
     def __init__(self, in_channels: int, out_channels: int, use_1x1conv: bool) -> None:
@@ -38,31 +43,29 @@ class Vgg16(nn.Module):
             num_classes (int): the number of classes
         """
         super(Vgg16, self).__init__()
-        self._extractor = nn.Sequential(ConvBlock(3, 64, False),
-                                        nn.MaxPool2d(2, 2),
-                                        ConvBlock(64, 128, False),
-                                        nn.MaxPool2d(2, 2),
-                                        ConvBlock(128, 256, True),
-                                        nn.MaxPool2d(2, 2),
-                                        ConvBlock(256, 512, True),
-                                        nn.MaxPool2d(2, 2),
-                                        ConvBlock(512, 512, True),
-                                        nn.MaxPool2d(2, 2))
-
-        self._classifier = nn.Sequential(nn.Linear(512, 512),
-                                         nn.ReLU(),
-                                         nn.BatchNorm1d(512),
-                                         nn.Linear(512, 512),
-                                         nn.ReLU(),
-                                         nn.BatchNorm1d(512),
-                                         nn.Linear(512, num_classes))
+        self._ops = nn.Sequential(ConvBlock(3, 64, False),
+                                  nn.MaxPool2d(2, 2),
+                                  ConvBlock(64, 128, False),
+                                  nn.MaxPool2d(2, 2),
+                                  ConvBlock(128, 256, True),
+                                  nn.MaxPool2d(2, 2),
+                                  ConvBlock(256, 512, True),
+                                  nn.MaxPool2d(2, 2),
+                                  ConvBlock(512, 512, True),
+                                  nn.AdaptiveAvgPool2d((1, 1)),
+                                  Flatten(),
+                                  nn.Linear(512, 512),
+                                  nn.ReLU(),
+                                  nn.BatchNorm1d(512),
+                                  nn.Linear(512, 512),
+                                  nn.ReLU(),
+                                  nn.BatchNorm1d(512),
+                                  nn.Linear(512, num_classes))
 
         self.apply(self._init_weight)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        fmap = self._extractor(x)
-        flattend = fmap.view(-1, 512)
-        score = self._classifier(flattend)
+        score = self._ops(x)
         return score
 
     def _init_weight(self, layer):
