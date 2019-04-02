@@ -13,15 +13,16 @@ class BottleNeck(nn.Module):
         self._pooling = (in_channels != out_channels)
 
         if self._pooling:
-            self._ops = nn.Sequential(nn.Conv2d(in_channels, in_channels // 2, 1, 2),
+            self._ops = nn.Sequential(nn.Conv2d(in_channels, in_channels // 2, 1, 1),
                                       nn.BatchNorm2d(in_channels // 2),
                                       nn.ReLU(),
-                                      nn.Conv2d(in_channels // 2, in_channels // 2, 3, 1, 1),
+                                      nn.Conv2d(in_channels // 2, in_channels // 2, 3, 2, 1),
                                       nn.BatchNorm2d(in_channels // 2),
                                       nn.ReLU(),
                                       nn.Conv2d(in_channels // 2, out_channels, 1, 1),
                                       nn.BatchNorm2d(out_channels))
-            self._shortcut = nn.Conv2d(in_channels, out_channels, 1, 2)
+            self._shortcut = nn.Sequential(nn.Conv2d(in_channels, out_channels, 1, 2),
+                                           nn.BatchNorm2d(out_channels))
         else:
             self._ops = nn.Sequential(nn.Conv2d(in_channels, in_channels // 4, 1, 1),
                                       nn.BatchNorm2d(in_channels // 4),
@@ -40,26 +41,20 @@ class BottleNeck(nn.Module):
         fmap = F.relu(self._bn(fmap))
         return fmap
 
-class ResNet50(nn.Module):
+class ResNet(nn.Module):
     def __init__(self, num_classes):
-        super(ResNet50, self).__init__()
-        self._ops = nn.Sequential(nn.Conv2d(3, 64, 3, 2, 3),
-                                  nn.MaxPool2d(3, 2, 1),
-                                  BottleNeck(64, 64),
+        super(ResNet, self).__init__()
+        self._ops = nn.Sequential(nn.Conv2d(3, 64, 3, 1, 1),
+                                  nn.BatchNorm2d(64),
                                   BottleNeck(64, 64),
                                   BottleNeck(64, 64),
                                   BottleNeck(64, 128),
                                   BottleNeck(128, 128),
                                   BottleNeck(128, 128),
-                                  BottleNeck(128, 128),
                                   BottleNeck(128, 256),
                                   BottleNeck(256, 256),
                                   BottleNeck(256, 256),
-                                  BottleNeck(256, 256),
-                                  BottleNeck(256, 256),
-                                  BottleNeck(256, 256),
                                   BottleNeck(256, 512),
-                                  BottleNeck(512, 512),
                                   BottleNeck(512, 512),
                                   nn.AdaptiveAvgPool2d((1, 1)),
                                   nn.Conv2d(512, num_classes, 1, 1),

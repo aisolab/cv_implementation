@@ -6,9 +6,9 @@ import torch.nn as nn
 import torch.optim as optim
 from torchvision.datasets import CIFAR10
 from torchvision import transforms
-from torchvision.transforms import RandomHorizontalFlip, RandomVerticalFlip, ToTensor
+from torchvision.transforms import RandomCrop, RandomHorizontalFlip, ToTensor, Normalize
 from torch.utils.data import DataLoader
-from model.net import ResNet50
+from model.net import ResNet
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
 
@@ -38,20 +38,26 @@ def main(cfgpath):
 
     # creating model
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-    model = ResNet50(num_classes=num_classes)
+    model = ResNet(num_classes=num_classes)
     model.to(device)
 
     # creating dataset, dataloader
-    augment = transforms.Compose([RandomHorizontalFlip(), RandomVerticalFlip(), ToTensor()])
-    tr_ds = CIFAR10(root='./data', train=True, transform=augment, download=True)
+    transform_tr = transforms.Compose([RandomCrop(32, 4),
+                                       RandomHorizontalFlip(),
+                                       ToTensor(),
+                                       Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))])
+    transform_val = transforms.Compose([ToTensor(),
+                                        Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))])
+
+    tr_ds = CIFAR10(root='./data', train=True, transform=transform_tr, download=True)
     tr_dl = DataLoader(tr_ds, batch_size=batch_size, shuffle=True, num_workers=4, drop_last=True)
-    val_ds = CIFAR10(root='./data', train=False, transform=ToTensor(), download=False)
+    val_ds = CIFAR10(root='./data', train=False, transform=transform_val, download=False)
     val_dl = DataLoader(val_ds, batch_size=batch_size, num_workers=4)
 
     # training
     loss_fn = nn.CrossEntropyLoss()
-    opt = optim.SGD(params=model.parameters(), lr=learning_rate, momentum=.9, weight_decay=1e-4)
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(opt)
+    opt = optim.Adam(params=model.parameters(), lr=learning_rate, weight_decay=5e-4)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(opt, patience=5)
     writer = SummaryWriter('./runs/exp')
 
     for epoch in tqdm(range(epochs), desc='epochs'):
@@ -68,10 +74,10 @@ def main(cfgpath):
             opt.step()
 
             tr_loss += mb_loss.item()
-            if (epoch * batch_size + step) % 300 == 0:
+            if (epoch * len(tr_dl) + step) % 300 == 0:
                 val_loss = evaluate(model, val_dl, loss_fn, device)
                 writer.add_scalars('loss', {'train': tr_loss / (step + 1),
-                                            'validation': val_loss}, epoch * batch_size + step)
+                                            'validation': val_loss}, epoch * len(tr_dl) + step)
                 model.train()
 
         else:
