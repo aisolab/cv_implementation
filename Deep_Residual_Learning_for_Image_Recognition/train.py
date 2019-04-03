@@ -28,7 +28,7 @@ def evaluate(model, dataloader, loss_fn, device):
 
 def main(cfgpath):
     # parsing json
-    with open(os.path.join(os.getcwd(), 'experiments/config.json')) as io:
+    with open(os.path.join(os.getcwd(), cfgpath)) as io:
         params = json.loads(io.read())
 
     num_classes = params['model'].get('num_classes')
