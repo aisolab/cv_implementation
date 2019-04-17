@@ -1,13 +1,14 @@
-import os
 import json
 import fire
 import torch
+from pathlib import Path
 from torchvision.datasets import CIFAR10
 from torchvision import transforms
 from torchvision.transforms import ToTensor, Normalize
 from torch.utils.data import DataLoader
 from model.net import Vgg16
 from tqdm import tqdm
+
 
 def get_accuracy(model, dataloader, device):
     correct_count = 0
@@ -23,14 +24,16 @@ def get_accuracy(model, dataloader, device):
         acc = correct_count / total_count
     return acc
 
+
 def main(cfgpath):
     # parsing json
-    with open(os.path.join(os.getcwd(), cfgpath)) as io:
+    proj_dir = Path.cwd()
+    with open(proj_dir / cfgpath) as io:
         params = json.loads(io.read())
 
     num_classes = params['model'].get('num_classes')
     batch_size = params['training'].get('batch_size')
-    savepath = os.path.join(os.getcwd(), params['filepath'].get('ckpt'))
+    savepath = proj_dir / params['filepath'].get('ckpt')
     ckpt = torch.load(savepath)
 
     # creating model
@@ -55,6 +58,7 @@ def main(cfgpath):
     tr_acc = get_accuracy(model, tr_dl, device)
     val_acc = get_accuracy(model, val_dl, device)
     print('tr_acc: {:.2%}, val_acc: {:.2%}'.format(tr_acc, val_acc))
+
 
 if __name__ == '__main__':
     fire.Fire(main)
