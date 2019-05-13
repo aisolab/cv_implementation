@@ -13,7 +13,7 @@ The papers were implemented in using CIFAR-10
 
 * [x] [Very Deep Convolutional Networks for Large-Scale Image Recognition](https://github.com/aisolab/cv_implementation/tree/master/Very_Deep_Convolutional_Networks_for_Large-Scale_Image_Recognition) (Vgg16)
   + https://arxiv.org/abs/1409.1556
-* [ ] [Goin deeper with convolutions]() (Inception v1)
+* [x] [Goin deeper with convolutions]() (Inception v1)
   + https://arxiv.org/abs/1409.4842
 * [ ] [Rethinking the Inception Architecture for Computer Vision]() (Inception v2, Inception v3)
   + https://arxiv.org/abs/1512.00567
