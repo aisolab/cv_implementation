@@ -1,9 +1,9 @@
-import os
 import json
 import fire
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from pathlib import Path
 from torchvision.datasets import CIFAR10
 from torchvision import transforms
 from torchvision.transforms import RandomCrop, RandomHorizontalFlip, ToTensor, Normalize
@@ -11,6 +11,7 @@ from torch.utils.data import DataLoader
 from model.net import ResNet50
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
+
 
 def evaluate(model, dataloader, loss_fn, device):
     model.eval()
@@ -26,9 +27,11 @@ def evaluate(model, dataloader, loss_fn, device):
         avg_loss /= (step + 1)
     return avg_loss
 
+
 def main(cfgpath):
+    proj_dir = Path.cwd()
     # parsing json
-    with open(os.path.join(os.getcwd(), cfgpath)) as io:
+    with open(proj_dir / cfgpath) as io:
         params = json.loads(io.read())
 
     num_classes = params['model'].get('num_classes')
@@ -90,8 +93,9 @@ def main(cfgpath):
             'model_state_dict': model.state_dict(),
             'opt_state_dict': opt.state_dict()}
 
-    savepath = os.path.join(os.getcwd(), params['filepath'].get('ckpt'))
+    savepath = proj_dir / params['filepath'].get('ckpt')
     torch.save(ckpt, savepath)
+
 
 if __name__ == '__main__':
     fire.Fire(main)

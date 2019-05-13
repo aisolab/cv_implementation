@@ -1,6 +1,6 @@
+from model.ops import Flatten, ConvBlock
 import torch
 import torch.nn as nn
-
 
 class Flatten(nn.Module):
     """Flatten class"""
@@ -73,7 +73,3 @@ class Vgg16(nn.Module):
     def _init_weight(self, layer):
         nn.init.kaiming_uniform_(layer.weight) if isinstance(layer, nn.Conv2d) or isinstance(layer, nn.Linear) \
             else None
-
-
-
-
