@@ -13,8 +13,11 @@ from model.net import Vgg16
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
 
+
 def evaluate(model, dataloader, loss_fn, device):
-    model.eval()
+    if model.training:
+        model.eval()
+
     avg_loss = 0
 
     for step, mb in tqdm(enumerate(dataloader), desc='steps', total=len(dataloader)):
@@ -27,7 +30,8 @@ def evaluate(model, dataloader, loss_fn, device):
         avg_loss /= (step + 1)
     return avg_loss
 
-def main(cfgpath):
+
+def main(cfgpath, global_step):
     # parsing json
     with open(os.path.join(os.getcwd(), cfgpath)) as io:
         params = json.loads(io.read())
@@ -75,7 +79,7 @@ def main(cfgpath):
             opt.step()
 
             tr_loss += mb_loss.item()
-            if (epoch * len(tr_dl) + step) % 300 == 0:
+            if (epoch * len(tr_dl) + step) % global_step == 0:
                 val_loss = evaluate(model, val_dl, loss_fn, device)
                 writer.add_scalars('loss', {'train': tr_loss / (step + 1),
                                             'validation': val_loss}, epoch * len(tr_dl) + step)
@@ -89,11 +93,11 @@ def main(cfgpath):
         tqdm.write('epochs : {:3}, tr_loss: {:.3f}, val_loss: {:.3f}'.format(epoch + 1, tr_loss, val_loss))
 
     ckpt = {'epoch': epoch,
-            'model_state_dict': model.state_dict(),
-            'opt_state_dict': opt.state_dict()}
+            'model_state_dict': model.state_dict()}
 
     savepath = os.path.join(os.getcwd(), params['filepath'].get('ckpt'))
     torch.save(ckpt, savepath)
+
 
 if __name__ == '__main__':
     fire.Fire(main)

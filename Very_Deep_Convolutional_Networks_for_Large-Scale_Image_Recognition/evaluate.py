@@ -9,7 +9,11 @@ from torch.utils.data import DataLoader
 from model.net import Vgg16
 from tqdm import tqdm
 
+
 def get_accuracy(model, dataloader, device):
+    if model.training:
+        model.eval()
+
     correct_count = 0
     total_count = 0
     for mb in tqdm(dataloader, desc='steps'):
@@ -22,6 +26,7 @@ def get_accuracy(model, dataloader, device):
     else:
         acc = correct_count / total_count
     return acc
+
 
 def main(cfgpath):
     # parsing json
@@ -55,6 +60,7 @@ def main(cfgpath):
     tr_acc = get_accuracy(model, tr_dl, device)
     val_acc = get_accuracy(model, val_dl, device)
     print('tr_acc: {:.2%}, val_acc: {:.2%}'.format(tr_acc, val_acc))
+
 
 if __name__ == '__main__':
     fire.Fire(main)

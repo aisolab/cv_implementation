@@ -1,10 +1,12 @@
 import torch
 import torch.nn as nn
 
+
 class Flatten(nn.Module):
     """Flatten class"""
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return x.view(x.size(0), -1)
+
 
 class ConvBlock(nn.Module):
     "ConvBlock for Vgg16"
