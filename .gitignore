@@ -111,3 +111,7 @@ venv.bak/
 
 # Tensorboard
 events.out.tfevents.*
+
+
+# project data
+data
