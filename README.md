@@ -8,8 +8,9 @@ The papers were implemented in using CIFAR-10
 
 |                  | Train ACC (50,000) | Validation ACC (10,000) |
 | :--------------- | :-------: | :------------: |
-| Vgg16      |  90.19%  |     86.28%     |
-| ResNet50  | 85.36% | 83.30% |
+| Vgg16      |  87.62%  |     84.15%     |
+| Inception v1 | 90.47% | 87.07% |
+| ResNet50  | 87.49% | 84.99% |
 
 * [x] [Very Deep Convolutional Networks for Large-Scale Image Recognition](https://github.com/aisolab/cv_implementation/tree/master/Very_Deep_Convolutional_Networks_for_Large-Scale_Image_Recognition) (Vgg16)
   + https://arxiv.org/abs/1409.1556
